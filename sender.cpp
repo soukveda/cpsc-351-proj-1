@@ -34,12 +34,45 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		    is unique system-wide among all SYstem V objects. Two objects, on the other hand,
 		    may have the same key.
 	 */
-	
 
-	
+	// generate a key and save it to a variable
+	key_t key = ftok("keyfile.txt", 'a');
+
 	/* TODO: Get the id of the shared memory segment. The size of the segment must be SHARED_MEMORY_CHUNK_SIZE */
+
+	// save the id of the shared memory segment
+	shmid = shmget(key, SHARED_MEMORY_CHUNK_SIZE, IPC_CREAT | 0666);
+
+	// Check to see if the shared memory segment ID was created successfully
+	if(shmid == -1){
+		printf("Creation of shared memory segment ID was unsuccessful: %d\n", shmid);
+		exit(1);
+	}
+
 	/* TODO: Attach to the shared memory */
+
+	sharedMemPtr = (int*) shmat(shmid, NULL, 0);
+
+	// Check to see if attachment to shared memory was successful
+	if((size_t) sharedMemPtr == -1) {
+		printf("Attachment to shared memory was unsuccessful\n");
+		exit(1);
+	}
+
+	// save the ID of the message queue
+	msqid = msgget(key, 0);
+
+	// Check to see if message queue ID was created successfully
+	if(msqid == -1) {
+		printf("Creation of shared memory segment ID was unccessful: %d\n", msqid);
+	}
+
 	/* TODO: Attach to the message queue */
+	
+	// if(msgsnd(msqid, sharedMemPtr, 0) == -1) {
+	// 	printf("Unsuccessfully attached to the message queue\n");
+	// }
+
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
 	
 }
