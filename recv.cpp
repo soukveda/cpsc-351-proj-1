@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "msg.h"    /* For the message struct */
 
+//3-21 - working on something new. todo: error checks
 
 /* The size of the shared memory chunk */
 #define SHARED_MEMORY_CHUNK_SIZE 1000
@@ -27,6 +28,8 @@ const char recvFileName[] = "recvfile";
  * @param sharedMemPtr - the pointer to the shared memory
  */
 
+//take each program and attach to a shared memory segment
+//connect to a message queue used by the both of them
 void init(int& shmid, int& msqid, void*& sharedMemPtr)
 {
 
@@ -51,8 +54,6 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 	   sharedMemPtr = shmat(shmid, (void *)0, 0); //attach to shared memory
 	   msqid = msgget(key, 0666 | IPC_CREAT); //create message queue
 }
-
-
 /**
  * The main loop
  */
@@ -71,8 +72,8 @@ void mainLoop()
 		exit(-1);
 	}
 
-    /* TODO: Receive the message and get the message size. The message will
-     * contain regular information. The message will be of SENDER_DATA_TYPE
+    /* TODO: X Receive the message and get the message size. The message will
+     * contain regular information. X The message will be of SENDER_DATA_TYPE
      * (the macro SENDER_DATA_TYPE is defined in msg.h).  If the size field
      * of the message is not 0, then we copy that many bytes from the shared
      * memory region to the file. Otherwise, if 0, then we close the file and
@@ -81,8 +82,9 @@ void mainLoop()
      * NOTE: the received file will always be saved into the file called
      * "recvfile"
      */
+
 		 message temp;
-		 //Int msqid, void *msgp, size_t msgsz, long msgtyp,int msgflg
+		 //msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);
 		 msgrcv(msqid, &temp, sizeof(temp), SENDER_DATA_TYPE, 0)
 		 msgSize = temp.size;
 
@@ -106,9 +108,11 @@ void mainLoop()
  			 * does not matter in this case).
  			 */
 			 message doneMessage;
-			 doneMessage.mtype = RECV_DONE_TYPE;
-
+			 //int msgsnd(int msqid, const void *msgp, size_t msgsz, int msgflg);
+			 msgsnd(msqid, &doneMessage, sizeof(doneMessage), RECV_DONE_TYPE);
 			 printf("We are ready for the next chunk.");
+
+			 //Need a way to keep this loop running, implement later
 		}
 		/* We are done */
 		else
@@ -131,10 +135,13 @@ void mainLoop()
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
 	/* TODO: Detach from shared memory */
-
+	shmdt(sharedMemPtr)
 	/* TODO: Deallocate the shared memory chunk */
-
+	/*from geeksforgeeks: when you detach from shared memory,it is not destroyed. So, to destroy
+	shmctl() is used.*/
+	shmctl(shmid, IPC_RMID, NULL)
 	/* TODO: Deallocate the message queue */
+	msgctl(msqid, IPC_RMID, NULL)
 }
 
 /**
@@ -156,6 +163,7 @@ int main(int argc, char** argv)
  	 * queues and shared memory before exiting. You may add the cleaning functionality
  	 * in ctrlCSignal().
  	 */
+	signal(SIGINT, ctrlCSignal);
 
 	/* Initialize */
 	init(shmid, msqid, sharedMemPtr);
@@ -164,6 +172,7 @@ int main(int argc, char** argv)
 	mainLoop();
 
 	/** TODO: Detach from shared memory segment, and deallocate shared memory and message queue (i.e. call cleanup) **/
-
+	cleanUp(shmid, msqid, sharedMemPtr);
+	printf("Done\n")
 	return 0;
 }
