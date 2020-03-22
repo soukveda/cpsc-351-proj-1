@@ -59,22 +59,23 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 		exit(1);
 	}
 
-	// save the ID of the message queue
-	msqid = msgget(key, 0);
-
-	// Check to see if message queue ID was created successfully
-	if(msqid == -1) {
-		printf("Creation of shared memory segment ID was unccessful: %d\n", msqid);
-	}
-
+	
 	/* TODO: Attach to the message queue */
 	
 	// if(msgsnd(msqid, sharedMemPtr, 0) == -1) {
 	// 	printf("Unsuccessfully attached to the message queue\n");
 	// }
 
+	// save the ID of the message queue
+	msqid = msgget(key, 00400);
+
+	// Check to see if message queue ID was created successfully
+	if(msqid == -1) {
+		printf("Creation of shared memory segment ID was unccessful: %d\n", msqid);
+	}
+
 	/* Store the IDs and the pointer to the shared memory region in the corresponding parameters */
-	
+
 }
 
 /**
