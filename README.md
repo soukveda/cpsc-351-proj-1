@@ -15,7 +15,14 @@ Programming language used:
 
 
 How to execute the program:
-- 
+- navigate to your working directory in the terminal
+- type "make" into the terminal to compile both the receiver and sender programs
+- open another terminal in the same directory (you should have two terminals running)
+- type "./recv" in one terminal
+- type "./sender 'keyfile.txt' in the other
+
+# The rest is still a work in progress
+- press "crt+c" in the terminal with the receiver process to terminate
 
 Is the extra credit implemented? ->
 
