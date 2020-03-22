@@ -85,7 +85,7 @@ void mainLoop()
 
 		 message temp;
 		 //msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);
-		 msgrcv(msqid, &temp, sizeof(temp), SENDER_DATA_TYPE, 0)
+		 msgrcv(msqid, &temp, sizeof(temp), SENDER_DATA_TYPE, 0);
 		 msgSize = temp.size;
 
 	/* Keep receiving until the sender set the size to 0, indicating that
@@ -135,13 +135,13 @@ void mainLoop()
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
 	/* TODO: Detach from shared memory */
-	shmdt(sharedMemPtr)
+	shmdt(sharedMemPtr);
 	/* TODO: Deallocate the shared memory chunk */
 	/*from geeksforgeeks: when you detach from shared memory,it is not destroyed. So, to destroy
 	shmctl() is used.*/
-	shmctl(shmid, IPC_RMID, NULL)
+	shmctl(shmid, IPC_RMID, NULL);
 	/* TODO: Deallocate the message queue */
-	msgctl(msqid, IPC_RMID, NULL)
+	msgctl(msqid, IPC_RMID, NULL);
 }
 
 /**
@@ -173,6 +173,6 @@ int main(int argc, char** argv)
 
 	/** TODO: Detach from shared memory segment, and deallocate shared memory and message queue (i.e. call cleanup) **/
 	cleanUp(shmid, msqid, sharedMemPtr);
-	printf("Done\n")
+	printf("Done\n");
 	return 0;
 }

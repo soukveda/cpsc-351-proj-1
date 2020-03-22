@@ -146,7 +146,7 @@ void send(const char* fileName)
  		 */
 		printf("Receiver is receiving the data\n");
 
-		if(msgrcv(msqid, &sndMsg, sizeof(sndMsg), RECV_DONE_TYPE, 0)){
+		if(msgrcv(msqid, &rcvMsg, sizeof(sndMsg), RECV_DONE_TYPE, 0)){
 			perror("msgrcv:");
 		}
 	}
@@ -173,7 +173,8 @@ void send(const char* fileName)
 
 int main(int argc, char** argv)
 {
-	
+	printf("test\n");
+
 	/* Check the command line arguments */
 	if(argc < 2)
 	{
@@ -189,6 +190,7 @@ int main(int argc, char** argv)
 	
 	/* Cleanup */
 	cleanUp(shmid, msqid, sharedMemPtr);
+	
 		
 	return 0;
 }
