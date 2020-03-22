@@ -88,6 +88,8 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
 	/* TODO: Detach from shared memory */
+	shmdt(sharedMemPtr);
+	printf("Detaching from Memory Segment\n");
 }
 
 /**
@@ -130,10 +132,23 @@ void send(const char* fileName)
 		/* TODO: Send a message to the receiver telling him that the data is ready 
  		 * (message of type SENDER_DATA_TYPE) 
  		 */
+
+		 printf("Sending data to receiver");
+		 sndMsg.mtype = SENDER_DATA_TYPE;
+
+		 if(msgsnd(msqid, &sndMsg, sizeof(sndMsg), 0) < 0){
+			perror("msgsnd:");
+		 }
+		 printf("Message successfully sent\n");
 		
 		/* TODO: Wait until the receiver sends us a message of type RECV_DONE_TYPE telling us 
  		 * that he finished saving the memory chunk. 
  		 */
+		printf("Receiver is receiving the data\n");
+
+		if(msgrcv(msqid, &sndMsg, sizeof(sndMsg), RECV_DONE_TYPE, 0)){
+			perror("msgrcv:");
+		}
 	}
 	
 
@@ -141,6 +156,13 @@ void send(const char* fileName)
  	  * Lets tell the receiver that we have nothing more to send. We will do this by
  	  * sending a message of type SENDER_DATA_TYPE with size field set to 0. 	
 	  */
+
+	 sndMsg.mtype = 0;
+	 if(msgsnd(msqid, &sndMsg, sizeof(sndMsg), 0)<0){
+		 perror("msgsnd:");
+	 }
+
+	 printf("Sent Program Completed");
 
 		
 	/* Close the file */
