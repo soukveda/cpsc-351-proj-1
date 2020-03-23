@@ -85,7 +85,10 @@ void mainLoop()
 
 		 message temp;
 		 //msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);
-		 msgrcv(msqid, &temp, sizeof(temp), SENDER_DATA_TYPE, 0);
+		 if(msgrcv(msqid, &temp, sizeof(temp), SENDER_DATA_TYPE, 0) < 0) //error check this.
+		 {
+			 	perror("msgrcv");
+		 };
 		 msgSize = temp.size;
 
 	/* Keep receiving until the sender set the size to 0, indicating that
@@ -97,10 +100,11 @@ void mainLoop()
 		/* If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{
+			printf("Writing to file\n");
 			/* Save the shared memory to file */
 			if(fwrite(sharedMemPtr, sizeof(char), msgSize, fp) < 0)
 			{
-				perror("fwrite");
+					perror("fwrite");
 			}
 
 			/* TODO: Tell the sender that we are ready for the next file chunk.
@@ -108,9 +112,14 @@ void mainLoop()
  			 * does not matter in this case).
  			 */
 			 message doneMessage;
+			 doneMessage.mtype = RECV_DONE_TYPE;
+			 doneMessage.size = 0;
 			 //int msgsnd(int msqid, const void *msgp, size_t msgsz, int msgflg);
-			 msgsnd(msqid, &doneMessage, sizeof(doneMessage), RECV_DONE_TYPE);
-			 printf("We are ready for the next chunk.");
+			 if(msgsnd(msqid, &doneMessage, sizeof(doneMessage), RECV_DONE_TYPE) < 0)
+			 {
+				perror("msgsnd");
+			 }
+			 printf("We are ready for the next chunk.\n");
 
 			 //Need a way to keep this loop running, implement later
 		}
@@ -135,13 +144,17 @@ void mainLoop()
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
 	/* TODO: Detach from shared memory */
+	printf("Detatching from the shared memory\n");
 	shmdt(sharedMemPtr);
 	/* TODO: Deallocate the shared memory chunk */
 	/*from geeksforgeeks: when you detach from shared memory,it is not destroyed. So, to destroy
 	shmctl() is used.*/
+	printf("Deallocating shared memory chunk\n");
 	shmctl(shmid, IPC_RMID, NULL);
 	/* TODO: Deallocate the message queue */
+	printf("Deallocating message queue\n");
 	msgctl(msqid, IPC_RMID, NULL);
+	printf("Clean up is done.\n");
 }
 
 /**
