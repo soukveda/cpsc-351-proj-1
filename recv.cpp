@@ -83,20 +83,23 @@ void mainLoop()
      * "recvfile"
      */
 
-		 message temp;
-		 //msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);
-		 if(msgrcv(msqid, &temp, sizeof(temp), SENDER_DATA_TYPE, 0) < 0) //error check this.
-		 {
-			 	perror("msgrcv");
-		 };
-		 msgSize = temp.size;
-
+		message temp;
+		 
+		//msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);
+		
+		if(msgrcv(msqid, &temp, sizeof(temp), SENDER_DATA_TYPE, 0) < 0) //error check this.
+		{
+			perror("msgrcv");
+		};
+		msgSize = temp.size;
+		
 	/* Keep receiving until the sender set the size to 0, indicating that
  	 * there is no more data to send
  	 */
 
 	while(msgSize != 0)
 	{
+
 		/* If the sender is not telling us that we are done, then get to work */
 		if(msgSize != 0)
 		{
@@ -108,20 +111,25 @@ void mainLoop()
 			}
 
 			/* TODO: Tell the sender that we are ready for the next file chunk.
- 			 * I.e. send a message of type RECV_DONE_TYPE (the value of size field
- 			 * does not matter in this case).
- 			 */
-			 message doneMessage;
-			 doneMessage.mtype = RECV_DONE_TYPE;
-			 doneMessage.size = 0;
-			 //int msgsnd(int msqid, const void *msgp, size_t msgsz, int msgflg);
-			 if(msgsnd(msqid, &doneMessage, sizeof(doneMessage), RECV_DONE_TYPE) < 0)
-			 {
+ 			* I.e. send a message of type RECV_DONE_TYPE (the value of size field
+ 			* does not matter in this case).
+ 			*/
+			message doneMessage;
+			doneMessage.mtype = RECV_DONE_TYPE;
+			doneMessage.size = 0;
+	
+			if(msgsnd(msqid, &doneMessage, sizeof(doneMessage), RECV_DONE_TYPE) < 0)
+			{
 				perror("msgsnd");
-			 }
-			 printf("We are ready for the next chunk.\n");
+			}
+			printf("We are ready for the next chunk.\n");
 
-			 //Need a way to keep this loop running, implement later
+			// receive the next message
+			if(msgrcv(msqid, &temp, sizeof(temp), SENDER_DATA_TYPE, 0) < 0) //error check this.
+		 	{
+			 	perror("msgrcv");
+		 	};
+		 	msgSize = temp.size;
 		}
 		/* We are done */
 		else
@@ -166,6 +174,7 @@ void ctrlCSignal(int signal)
 {
 	/* Free system V resources */
 	cleanUp(shmid, msqid, sharedMemPtr);
+	exit(0);
 }
 
 int main(int argc, char** argv)
@@ -186,6 +195,6 @@ int main(int argc, char** argv)
 
 	/** TODO: Detach from shared memory segment, and deallocate shared memory and message queue (i.e. call cleanup) **/
 	cleanUp(shmid, msqid, sharedMemPtr);
-	printf("Done\n");
+
 	return 0;
 }

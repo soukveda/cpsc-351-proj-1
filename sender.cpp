@@ -62,10 +62,6 @@ void init(int& shmid, int& msqid, void*& sharedMemPtr)
 
 	/* TODO: Attach to the message queue */
 
-	// if(msgsnd(msqid, sharedMemPtr, 0) == -1) {
-	// 	printf("Unsuccessfully attached to the message queue\n");
-	// }
-
 	// save the ID of the message queue
 	msqid = msgget(key, 00400);
 
@@ -133,7 +129,7 @@ void send(const char* fileName)
  		 * (message of type SENDER_DATA_TYPE)
  		 */
 
-		 printf("Sending data to receiver");
+		 printf("Sending data to receiver\n");
 		 sndMsg.mtype = SENDER_DATA_TYPE;
 
 		 if(msgsnd(msqid, &sndMsg, sizeof(sndMsg), 0) < 0){
@@ -146,9 +142,10 @@ void send(const char* fileName)
  		 */
 		printf("Receiver is receiving the data\n");
 
-		if(msgrcv(msqid, &rcvMsg, sizeof(sndMsg), RECV_DONE_TYPE, 0)){
-			perror("msgrcv:");
-		}
+		do{
+			msgrcv(msqid, &rcvMsg, sizeof(rcvMsg), RECV_DONE_TYPE, 0);
+		}while(rcvMsg.mtype != RECV_DONE_TYPE);
+		
 	}
 
 
@@ -158,11 +155,13 @@ void send(const char* fileName)
 	  */
 
 	 sndMsg.mtype = SENDER_DATA_TYPE;
-	 if(msgsnd(msqid, &sndMsg, sizeof(sndMsg), 0)<0){
+	 sndMsg.size = 0;
+
+	if(msgsnd(msqid, &sndMsg, sizeof(sndMsg), 0)<0){
 		 perror("msgsnd:");
 	 }
 
-	 printf("Sent Program Completed");
+	 printf("Sent Program Completed\n");
 
 
 	/* Close the file */
@@ -173,8 +172,6 @@ void send(const char* fileName)
 
 int main(int argc, char** argv)
 {
-	printf("test\n");
-
 	/* Check the command line arguments */
 	if(argc < 2)
 	{
