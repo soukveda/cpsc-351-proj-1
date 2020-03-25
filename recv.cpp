@@ -152,7 +152,7 @@ void mainLoop()
 void cleanUp(const int& shmid, const int& msqid, void* sharedMemPtr)
 {
 	/* TODO: Detach from shared memory */
-	printf("Detatching from the shared memory\n");
+	printf("\nDetatching from the shared memory\n");
 	shmdt(sharedMemPtr);
 	/* TODO: Deallocate the shared memory chunk */
 	/*from geeksforgeeks: when you detach from shared memory,it is not destroyed. So, to destroy
