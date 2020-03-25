@@ -21,10 +21,12 @@ How to execute the program:
 - type "./recv" in one terminal
 - type "./sender 'keyfile.txt' in the other
 
-# The rest is still a work in progress
-- press "crt+c" in the terminal with the receiver process to terminate
 
-Is the extra credit implemented? ->
+- press "crt" +" c" in the terminal with the receiver process to deallocate memory, the message queue, and then exits.
+
+---------------------------------------------
+
+Is the extra credit implemented? -> No.
 
 
 
