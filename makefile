@@ -17,7 +17,7 @@ sender.o: sender.cpp
 	gcc -c -g sender.cpp
 
 tar:
-	tar cvf p1-cphongsa.tar *.cpp *.h makefile
+	tar cvf p1-cphongsa.tar *.cpp *.h makefile *.pdf *.png
 
 clean:
 	rm *.o recv sender recvfile	
